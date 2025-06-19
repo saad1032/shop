@@ -24,4 +24,14 @@ export const getProductByIdFallback = async (id) => {
   return { data: { data: product } };
 };
 
+export const getUserTheme = (jwt) =>
+  api.get('/users/me/theme', {
+    headers: { Authorization: `Bearer ${jwt}` },
+  });
+
+export const setUserTheme = (theme, jwt) =>
+  api.put('/users/me/theme', { theme }, {
+    headers: { Authorization: `Bearer ${jwt}` },
+  });
+
 export default api; 

@@ -5,17 +5,17 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
-    ActivityIndicator,
-    Alert,
-    Animated,
-    Dimensions,
-    FlatList,
-    Platform,
-    StatusBar,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View
+  ActivityIndicator,
+  Alert,
+  Animated,
+  Dimensions,
+  FlatList,
+  Platform,
+  StatusBar,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View
 } from 'react-native';
 import { getCategories } from '../../api/api';
 import { useAuth } from '../../contexts/AuthContext';
@@ -30,6 +30,7 @@ interface Category {
 export default function HomeScreen() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
   const router = useRouter();
   const { user, logout } = useAuth();
   const fadeAnim = new Animated.Value(0);
@@ -42,8 +43,12 @@ export default function HomeScreen() {
           ? res.data.data.filter((cat: any) => cat && cat.id && cat.name)
           : [];
         setCategories(valid);
+        setError(false);
       })
-      .catch(() => setCategories([]))
+      .catch(() => {
+        setCategories([]);
+        setError(true);
+      })
       .finally(() => setLoading(false));
   }, []);
 
@@ -104,6 +109,24 @@ export default function HomeScreen() {
     }
   };
 
+  const handleRetry = () => {
+    setLoading(true);
+    setError(false);
+    getCategories()
+      .then(res => {
+        const valid = Array.isArray(res.data.data)
+          ? res.data.data.filter((cat: any) => cat && cat.id && cat.name)
+          : [];
+        setCategories(valid);
+        setError(false);
+      })
+      .catch(() => {
+        setCategories([]);
+        setError(true);
+      })
+      .finally(() => setLoading(false));
+  };
+
   if (loading) {
     return (
       <LinearGradient
@@ -114,6 +137,18 @@ export default function HomeScreen() {
         <ActivityIndicator size="large" color="white" />
         <Text style={styles.loadingText}>Loading your shopping experience...</Text>
       </LinearGradient>
+    );
+  }
+
+  if (!loading && categories.length === 0) {
+    return (
+      <View style={styles.emptyContainer}>
+        <Ionicons name="alert-circle-outline" size={64} color="#aaa" style={{ marginBottom: 16 }} />
+        <Text style={styles.emptyText}>{error ? 'Failed to load categories.' : 'No categories found.'}</Text>
+        <TouchableOpacity style={styles.retryButton} onPress={handleRetry}>
+          <Text style={styles.retryButtonText}>Retry</Text>
+        </TouchableOpacity>
+      </View>
     );
   }
 
@@ -415,9 +450,10 @@ const styles = StyleSheet.create({
     marginLeft: 8,
   },
   emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 60,
-    paddingHorizontal: 20,
+    backgroundColor: '#f6f7fb',
   },
   emptyIconContainer: {
     marginBottom: 16,
@@ -436,10 +472,21 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   emptyText: {
-    fontSize: 16,
-    color: '#718096',
+    fontSize: 18,
+    color: '#888',
+    marginBottom: 16,
     textAlign: 'center',
-    lineHeight: 24,
+  },
+  retryButton: {
+    backgroundColor: '#4F8EF7',
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 8,
+  },
+  retryButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
   profileButton: {
     position: 'absolute',

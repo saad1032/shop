@@ -41,6 +41,20 @@ export default function TabLayout() {
           tabBarIcon: ({ color }) => <TabBarIcon name="search" color={color} />,
         }}
       />
+      <Tabs.Screen
+        name="settings"
+        options={{
+          title: 'Settings',
+          tabBarIcon: ({ color }) => <TabBarIcon name="settings" color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="chats"
+        options={{
+          title: 'Chats',
+          tabBarIcon: ({ color }) => <TabBarIcon name="chatbubble-ellipses" color={color} />,
+        }}
+      />
     </Tabs>
   );
 }
